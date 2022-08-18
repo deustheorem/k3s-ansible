@@ -47,6 +47,21 @@
     - /usr/local/bin/k3s
     - /var/lib/cni/
 
+- name: Locating all files in longhorn
+  find:
+    path: "/var/lib/longhorn"
+  register: cleanup
+  ignore_errors: true
+  when: longhorn_purge
+
+- name: Removing all files previously found in longhorn dir
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ cleanup.files }}"
+  ignore_errors: true
+  when: longhorn_purge
+
 - name: daemon_reload
   systemd:
     daemon_reload: yes
